@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h1>Thanks for signing up, <%= @user.firstName %> <%= @user.lastName %>!</h1>
+    <p>To confrim your email, please press the button:
+      <form action = "http://192.168.99.101:3001/users/confirm?token=<%= @user.confirmation_token %>" method = "post">
+        <input type="submit" name="confirm" value="Confirm" />
+    </form>
+    if you didn't register any account, please ignore this message.<br><br>
+
+    please DO NOT replay to this email.</p>
+  </body>
+</html>

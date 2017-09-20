@@ -1,0 +1,275 @@
+#Test with: http://editor.swagger.io/
+
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Authentication Microservice
+  description: Ruby on Rails + MySQL2 Database
+  contact:
+      name: Luis Fernando Valderrama vinchery
+      email: lfvalderramav@unal.edu.co
+  license:
+    name: Software Architecture 2017-II
+host: 192.168.99.101:3001
+basePath: /
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /users:
+    post:
+      summary: Creates a new user
+      operationId: createUSer
+      parameters:
+        - name: user
+          in: body
+          required: true
+          description: User Object
+          schema:
+            $ref: '#/definitions/Userreg'
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    
+  /users/{id}:
+    get:
+      summary: Returns a product with the given id only if the user is loged in
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          description: The id of the user to be returned
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/User'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+            description: Forbbiden
+            schema:
+              $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+    put:
+      summary: Updates a user with the given id
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          description: The id of the user to be updated
+          required: true
+          type: string
+        - name: Authorization
+          in: header
+          description: The session token of the user
+          required: true
+          type: string
+        - name: user
+          in: body
+          required: true
+          description: User Object
+          schema:
+            $ref: '#/definitions/UserWithoutId'
+      responses:
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized 
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '406':
+            description: Not Acceptable (Email can't be changed)
+            schema:
+              $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+  /users/confirm/{confirmation_token}:
+    post:
+      summary: Confirms the email of an user
+      operationId: confirmUser
+      parameters:
+        - name: confirmation_token
+          in: path
+          description: The token of the email to be confirmed
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+            
+  /users/login:
+    post:
+      consumes: 
+        - application/x-www-form-urlencoded
+      summary: Gives the user a login token
+      operationId: loginUser
+      parameters:
+        - name: email
+          in: formData
+          description: The email of the user
+          required: true
+          type: string
+        - name: password
+          in: formData
+          description: The password of the user
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthenticated
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+            
+  /users/get_user:
+    post:
+      summary: Get the logged user's information
+      operationId: get_User
+      parameters:
+        - name: Authorization
+          in: header
+          description: The session token
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthenticated
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'   
+            
+  /users/search_user:
+    post:
+      summary: Looks if an user exists
+      operationId: search_User
+      parameters:
+        - name: id
+          in: query
+          description: The id of the user
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'           
+
+definitions:
+# Products
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+      firstName:
+        type: string
+      lastName:
+        type: string
+      money:
+        type: number
+      email:
+        type: string
+      password_digest:
+        type: string
+  
+  Userreg:
+    type: object
+    properties:
+      id:
+        type: integer
+      firstName:
+        type: string
+      lastName:
+        type: string
+      money:
+        type: number
+      email:
+        type: string
+      password:
+        type: string
+      confirm_password:
+        type: string
+
+  UserWithoutId:
+    type: object
+    properties:
+      id:
+        type: integer
+      firstName:
+        type: string
+      lastName:
+        type: string
+      money:
+        type: number
+      email:
+        type: string
+      password:
+        type: string
+      password_confirmation:
+        type: string
+
+
+# Errors
+  ErrorModel:
+    type: object
+    required:
+      - message
+      - code
+    properties:
+      message:
+        type: string
+      code:
+        type: number
+      description:
+        type: object
